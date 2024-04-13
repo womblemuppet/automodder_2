@@ -8,6 +8,7 @@ using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Versions;
 using Newtonsoft.Json;
 using System.IO;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Automodder_2
 {
@@ -19,14 +20,16 @@ namespace Automodder_2
     {
       CleanUpOutputFolder();
 
+      TestMakeKyFiles();
+
       CreatePak();
 
+      const string gameDir = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GUILTY GEAR STRIVE\\RED\\Content\\Paks";
+
+      string aesKey = System.IO.File.ReadAllText("./resources/aes_key.txt");
+      Debug.WriteLine(aesKey);
 
       return;
-
-      const string gameDir = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GUILTY GEAR STRIVE\\RED\\Content\\Paks";
-      const string aesKey = "0x3D96F3E41ED4B90B6C96CA3B2393F8911A5F6A48FE71F54B495E8F1AFD94CD73";
-
       var provider = new DefaultFileProvider(gameDir, SearchOption.TopDirectoryOnly, true, new VersionContainer(EGame.GAME_UE4_27));
       provider.Initialize();
       provider.SubmitKey(new FGuid(), new FAesKey(aesKey));
@@ -43,12 +46,24 @@ namespace Automodder_2
 
     static void CleanUpOutputFolder()
     {
+      System.IO.Directory.Delete("./output", true);
       System.IO.Directory.CreateDirectory("./output");
-      System.IO.DirectoryInfo outputFolder = new DirectoryInfo("./output");
+         
+    }
 
-      foreach (FileInfo file in outputFolder.GetFiles()) { file.Delete(); }
+    static void TestMakeKyFiles()
+    {
+      //System.IO.Directory.CreateDirectory("./output/to_pak/RED/Content/Chara/");
+      System.IO.Directory.CreateDirectory("./output/to_pak/RED/Content/Chara/KYK/Common/Data");
 
-      System.IO.Directory.CreateDirectory("./output/to_pak/RED/Content/Chara");
+      string[] filenames = Directory.GetFiles("./test_files");
+      foreach (string filename in filenames) {
+        System.IO.File.Copy(
+          filename,
+          "./output/to_pak/RED/Content/Chara/KYK/Common/Data/" + Path.GetFileName(filename)
+        );
+      }
+
     }
 
     static void CreatePak()
@@ -57,11 +72,13 @@ namespace Automodder_2
       File.WriteAllText("./output/files_to_pack.txt", unrealPakAllFilesLine);
 
       List<string> unrealPakArgs = new List<string> {
-        "",
-        ""
+        Directory.GetCurrentDirectory() + "/output/mod.pak",  
+        "-Create=" + Directory.GetCurrentDirectory() + "/output/files_to_pack.txt",
+        "-compress"
       };
 
       RunExecutable("external_apps/packer/UnrealPak.exe", unrealPakArgs);
+      System.IO.File.Copy("./resources/mod.sig", "./output/mod.sig");
     }
 
     static void RunExecutable(string exePath, IEnumerable<string> args)
@@ -70,7 +87,9 @@ namespace Automodder_2
       {
         Process process = new Process();
         process.StartInfo.FileName = exePath;
-        process.StartInfo.ArgumentList.Add = args;
+
+        foreach (string arg in args) { process.StartInfo.ArgumentList.Add(arg); }
+
         process.StartInfo.RedirectStandardOutput = true;
         process.Start();
 
