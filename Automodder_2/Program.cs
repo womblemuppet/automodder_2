@@ -9,6 +9,13 @@ using CUE4Parse.UE4.Versions;
 using Newtonsoft.Json;
 using System.IO;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using CUE4Parse.MappingsProvider;
+using System.Reflection.Metadata;
+using System.Windows.Forms.VisualStyles;
+using CUE4Parse.UE4.Assets.Objects;
+using CUE4Parse.UE4.Objects.UObject;
+using CUE4Parse.UE4.Assets.Exports;
+using CUE4Parse.UE4.Assets.Objects.Properties;
 
 namespace Automodder_2
 {
@@ -20,24 +27,64 @@ namespace Automodder_2
     {
       CleanUpOutputFolder();
 
-      TestMakeKyFiles();
+      //TestMakeKyFiles();
 
       CreatePak();
 
+      
       const string gameDir = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GUILTY GEAR STRIVE\\RED\\Content\\Paks";
-
-      string aesKey = System.IO.File.ReadAllText("./resources/aes_key.txt");
-      Debug.WriteLine(aesKey);
-
-      return;
       var provider = new DefaultFileProvider(gameDir, SearchOption.TopDirectoryOnly, true, new VersionContainer(EGame.GAME_UE4_27));
       provider.Initialize();
+
+      string aesKey = System.IO.File.ReadAllText("./resources/aes_key.txt");
       provider.SubmitKey(new FGuid(), new FAesKey(aesKey));
 
-      var allObjects = provider.LoadAllObjects("RED/Content/Chara/ABA/Costume01/Animation/Default/body/AB_body.uasset");
+      string uassetPath = "RED/Content/Chara/KYK/Costume01/Animation/Default/AnimArray.uasset";
+      var allObjects = provider.LoadAllObjects(uassetPath);
+
+      foreach (var obj in allObjects)
+      {
+        Debug.WriteLine(obj.GetType());
+        Debug.WriteLine("props follow:");
+        
+
+        foreach (var animDataArrayProperty in obj.Properties)
+        {
+          var animDataArray = animDataArrayProperty.Tag.GetValue<FStructFallback[]>();
+
+          foreach (var animData in animDataArray)
+          {
+            Debug.WriteLine(animData);
+
+            foreach (var animDataProperty in animData.Properties)
+            {
+              Debug.WriteLine(animDataProperty);
+            }
+
+          }
+        }
+      
+        Debug.WriteLine("-------------");
+
+        //obj.Properties.Clear();
+      }
+     
+      /*
+      System.IO.Directory.CreateDirectory("./output/to_pak/RED/Content/Chara/KYK/Costume01/Animation/Default/");
+       if (provider.TrySavePackage("RED/Content/Chara/KYK/Costume01/Animation/Default/AnimArray.uasset", out var assets))
+       {
+         foreach (var kvp in assets)
+         {
+           Debug.WriteLine("key: " + kvp.Key);
+           Debug.WriteLine("value: " + kvp.Value);
+           File.WriteAllBytes(Path.Combine("./output/to_pak/", kvp.Key), kvp.Value);
+         }
+       }
       var fullJson = JsonConvert.SerializeObject(allObjects, Newtonsoft.Json.Formatting.Indented);
-      Debug.WriteLine("fullJson:");
-      Debug.WriteLine(fullJson);
+
+      var bytes = provider.SaveAsset(uassetPath);
+      System.IO.File.WriteAllBytes("./output/to_pak/RED/Content/Chara/KYK/Costume01/Animation/Default/AnimArray.uasset", bytes);
+      */
 
 
       // ApplicationConfiguration.Initialize();
@@ -48,12 +95,10 @@ namespace Automodder_2
     {
       System.IO.Directory.Delete("./output", true);
       System.IO.Directory.CreateDirectory("./output");
-         
     }
 
     static void TestMakeKyFiles()
     {
-      //System.IO.Directory.CreateDirectory("./output/to_pak/RED/Content/Chara/");
       System.IO.Directory.CreateDirectory("./output/to_pak/RED/Content/Chara/KYK/Common/Data");
 
       string[] filenames = Directory.GetFiles("./test_files");
