@@ -16,6 +16,8 @@ using CUE4Parse.UE4.Assets.Objects;
 using CUE4Parse.UE4.Objects.UObject;
 using CUE4Parse.UE4.Assets.Exports;
 using CUE4Parse.UE4.Assets.Objects.Properties;
+using CUE4Parse.UE4.Assets.Exports.Animation;
+using System.Linq.Expressions;
 
 namespace Automodder_2
 {
@@ -25,28 +27,24 @@ namespace Automodder_2
 
     static void Main()
     {
-      CleanUpOutputFolder();
+      /*
+      string uassetPath = "RED/Content/Chara/KYK/Costume01/Animation/Default/AnimArray.uasset";
+      var bytes = provider.SaveAsset(uassetPath);
+      System.IO.Directory.CreateDirectory("./output/to_pak/RED/Content/Chara/KYK/Costume01/Animation/Default/");
+      System.IO.File.WriteAllBytes("./output/to_pak/RED/Content/Chara/KYK/Costume01/Animation/Default/AnimArray.uasset", bytes);
+      */
 
-      //TestMakeKyFiles();
 
-      CreatePak();
-
-      
-      const string gameDir = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GUILTY GEAR STRIVE\\RED\\Content\\Paks";
-      var provider = new DefaultFileProvider(gameDir, SearchOption.TopDirectoryOnly, true, new VersionContainer(EGame.GAME_UE4_27));
-      provider.Initialize();
-
-      string aesKey = System.IO.File.ReadAllText("./resources/aes_key.txt");
-      provider.SubmitKey(new FGuid(), new FAesKey(aesKey));
-
+      /*
       string uassetPath = "RED/Content/Chara/KYK/Costume01/Animation/Default/AnimArray.uasset";
       var allObjects = provider.LoadAllObjects(uassetPath);
+      var fullJson = JsonConvert.SerializeObject(allObjects, Newtonsoft.Json.Formatting.Indented);
 
       foreach (var obj in allObjects)
       {
         Debug.WriteLine(obj.GetType());
         Debug.WriteLine("props follow:");
-        
+
 
         foreach (var animDataArrayProperty in obj.Properties)
         {
@@ -58,34 +56,53 @@ namespace Automodder_2
 
             foreach (var animDataProperty in animData.Properties)
             {
-              Debug.WriteLine(animDataProperty);
+              Debug.WriteLine(animDataProperty.Name);
+
+              var prop = animDataProperty.Tag.GenericValue;
+              Debug.WriteLine(prop);
             }
 
           }
         }
-      
+
         Debug.WriteLine("-------------");
-
-        //obj.Properties.Clear();
       }
-     
-      /*
-      System.IO.Directory.CreateDirectory("./output/to_pak/RED/Content/Chara/KYK/Costume01/Animation/Default/");
-       if (provider.TrySavePackage("RED/Content/Chara/KYK/Costume01/Animation/Default/AnimArray.uasset", out var assets))
-       {
-         foreach (var kvp in assets)
-         {
-           Debug.WriteLine("key: " + kvp.Key);
-           Debug.WriteLine("value: " + kvp.Value);
-           File.WriteAllBytes(Path.Combine("./output/to_pak/", kvp.Key), kvp.Value);
-         }
-       }
-      var fullJson = JsonConvert.SerializeObject(allObjects, Newtonsoft.Json.Formatting.Indented);
-
-      var bytes = provider.SaveAsset(uassetPath);
-      System.IO.File.WriteAllBytes("./output/to_pak/RED/Content/Chara/KYK/Costume01/Animation/Default/AnimArray.uasset", bytes);
       */
 
+
+
+      CleanUpOutputFolder();
+
+      const string gameDir = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GUILTY GEAR STRIVE\\RED\\Content\\Paks";
+      var provider = new DefaultFileProvider(gameDir, SearchOption.TopDirectoryOnly, true, new VersionContainer(EGame.GAME_UE4_27));
+      provider.Initialize();
+
+      string aesKey = System.IO.File.ReadAllText("./resources/aes_key.txt");
+      provider.SubmitKey(new FGuid(), new FAesKey(aesKey));
+
+
+      /*
+      System.IO.Directory.CreateDirectory("./output/to_pak/RED/Content/Chara/KYK/Costume01/Animation/Default/");
+      if (provider.TrySavePackage("RED/Content/Chara/KYK/Costume01/Animation/Default/AnimArray.uasset", out var assets))
+      {
+        foreach (var kvp in assets)
+        {
+          Debug.WriteLine("key: " + kvp.Key);
+          Debug.WriteLine("value: " + kvp.Value);
+          File.WriteAllBytes(Path.Combine("./output/to_pak/", kvp.Key), kvp.Value);
+        }
+      }
+      */
+
+      // TODO: put these 3x into separate functions that explain what they do and then call Dad.
+
+
+
+
+
+
+
+      CreatePak();
 
       // ApplicationConfiguration.Initialize();
       // Application.Run(new Form1());
