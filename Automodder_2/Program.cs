@@ -27,6 +27,9 @@ namespace Automodder_2
 
     static void Main()
     {
+
+      // loads file into bytes using saveAsset (?!?)
+      // then writes bytes to file
       /*
       string uassetPath = "RED/Content/Chara/KYK/Costume01/Animation/Default/AnimArray.uasset";
       var bytes = provider.SaveAsset(uassetPath);
@@ -35,10 +38,19 @@ namespace Automodder_2
       */
 
 
+      // loads all objects from uasset file
+      // then serializes them to json
       /*
       string uassetPath = "RED/Content/Chara/KYK/Costume01/Animation/Default/AnimArray.uasset";
       var allObjects = provider.LoadAllObjects(uassetPath);
       var fullJson = JsonConvert.SerializeObject(allObjects, Newtonsoft.Json.Formatting.Indented);
+      */
+
+      // loops through all objects in uasset file
+      // then prints out their properties
+      /*
+      string uassetPath = "RED/Content/Chara/KYK/Costume01/Animation/Default/AnimArray.uasset";
+      var allObjects = provider.LoadAllObjects(uassetPath);
 
       foreach (var obj in allObjects)
       {
@@ -69,8 +81,6 @@ namespace Automodder_2
       }
       */
 
-
-
       CleanUpOutputFolder();
 
       const string gameDir = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\GUILTY GEAR STRIVE\\RED\\Content\\Paks";
@@ -93,13 +103,6 @@ namespace Automodder_2
         }
       }
       */
-
-      // TODO: put these 3x into separate functions that explain what they do and then call Dad.
-
-
-
-
-
 
 
       CreatePak();
